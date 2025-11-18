@@ -1,0 +1,65 @@
+# Build results
+bin/
+obj/
+artifacts/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+
+# Logs
+*.log
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+# Uncomment if you have local NuGet sources
+# *.nuget/
+
+# Test results
+TestResult.xml
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Generated files
+*.dll
+*.exe
+*.pdb
+*.mdb
+
+# OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Backup & temp files
+*.bak
+*.swp
+*.tmp
+*.temp
+
+# Rider / JetBrains
+.idea/
+*.iml
+
+# Dotnet tools
+.dotnet/
+tools/
+
+# Coverage reports
+coverage/
+*.lcov
