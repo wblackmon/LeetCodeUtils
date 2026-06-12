@@ -9,7 +9,7 @@ class Program
         Console.WriteLine(list.Print());
 
         Console.WriteLine("\n=== Tree Demo ===");
-        var tree = TreeNodeUtils.Create(new int[] { 1, 2, 3, 4, 5 });
-        Console.WriteLine(tree.Print());
+        var tree = TreeNodeUtils.Create(new int?[] { 1, 2, 3, 4, 5 });
+        Console.WriteLine(tree?.Print() ?? "[]");
     }
 }

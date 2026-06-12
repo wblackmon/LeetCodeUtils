@@ -1,5 +1,3 @@
-Got it Wayne 👍 — here’s a **single, consolidated `README.md` file** that combines everything we scaffolded (solution overview, usage, tests, NuGet packaging, roadmap, license) into one clean Markdown document:
-
 ---
 
 ## 📘 README.md
@@ -121,6 +119,28 @@ dotnet nuget push ./artifacts/LeetCodeUtils.*.nupkg --api-key YOUR_KEY --source 
 - [ ] Expand test coverage  
 
 ---
+
+## 🚀 Automated Releases & Versioning
+
+LeetCodeUtils uses a fully automated release pipeline powered by:
+
+- **Semantic version tags** (`v1.2.3`)
+- **GitHub Actions CI/CD**
+- **NuGet Trusted Publishing** (no API keys required)
+- **A local versioning script** (`tag-release.ps1`)
+
+Publishing a new version requires **one command**.
+
+---
+
+## 🔢 Versioning & Tagging
+
+Use the `tag-release.ps1` script to create and push version tags.
+
+### Automatic Patch Bump
+```powershell
+./tag-release.ps1 -Patch
+
 
 ## 📜 License
 

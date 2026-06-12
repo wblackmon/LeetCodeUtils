@@ -5,35 +5,40 @@ namespace LeetCodeUtils;
 
 public static class TreeNodeUtils
 {
-    public static TreeNode Create(int[] values)
+    public static TreeNode? Create(int?[] arr)
     {
-        if (values == null || values.Length == 0) return null!;
-        var root = new TreeNode(values[0]);
-        var queue = new Queue<TreeNode>();
+        if (arr == null || arr.Length == 0) return null;
+
+        if (!arr[0].HasValue) return null;
+        TreeNode root = new TreeNode(arr[0]!.Value);
+        Queue<TreeNode> queue = new Queue<TreeNode>();
         queue.Enqueue(root);
 
         int i = 1;
-        while (i < values.Length)
+        while (queue.Count > 0 && i < arr.Length)
         {
-            var node = queue.Dequeue();
+            TreeNode current = queue.Dequeue();
 
-            if (i < values.Length)
+            // Left child
+            if (i < arr.Length && arr[i].HasValue)
             {
-                node.left = new TreeNode(values[i]);
-                queue.Enqueue(node.left);
+                current.left = new TreeNode(arr[i]!.Value);
+                queue.Enqueue(current.left);
             }
             i++;
 
-            if (i < values.Length)
+            // Right child
+            if (i < arr.Length && arr[i].HasValue)
             {
-                node.right = new TreeNode(values[i]);
-                queue.Enqueue(node.right);
+                current.right = new TreeNode(arr[i]!.Value);
+                queue.Enqueue(current.right);
             }
             i++;
         }
 
         return root;
     }
+
 
     public static string Print(this TreeNode root)
     {
@@ -54,4 +59,37 @@ public static class TreeNodeUtils
         sb.Append("]");
         return sb.ToString();
     }
+    public static void Print(object[] arr)
+    {
+        if (arr == null || arr.Length == 0)
+        {
+            Console.WriteLine("[]");
+            return;
+        }
+
+        int level = 0;
+        int count = 1; // nodes per level
+        int index = 0;
+
+        while (index < arr.Length)
+        {
+            Console.Write($"Level {level}: ");
+
+            for (int i = 0; i < count && index < arr.Length; i++, index++)
+            {
+                string? val = arr[index] == null ? "null" : arr[index].ToString();
+                Console.Write(val);
+
+                // Print arrows between siblings
+                if (i < count - 1) Console.Write(" -> ");
+            }
+
+            Console.WriteLine();
+            level++;
+            count *= 2; // next level has twice as many possible nodes
+        }
+    }
+
 }
+
+

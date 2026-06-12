@@ -12,29 +12,6 @@ It includes canonical data structures (`ListNode`, `TreeNode`) and utility metho
 
 ---
 
-## 📂 Solution Structure
-
-```
-LeetCodeUtils.sln
-│
-├── src/
-│   ├── LeetCodeUtils/           # Class Library (NuGet-ready)
-│   │   ├── ListNode.cs
-│   │   ├── TreeNode.cs
-│   │   ├── ListNodeUtils.cs
-│   │   └── TreeNodeUtils.cs
-│   │
-│   └── LeetCodeUtils.Console/   # Console demo project
-│       └── Program.cs
-│
-└── tests/
-    └── LeetCodeUtils.Tests/     # xUnit test project
-        ├── ListNodeUtilsTests.cs
-        └── TreeNodeUtilsTests.cs
-```
-
----
-
 ## 🚀 Getting Started
 
 ### 1. Clone & Build
