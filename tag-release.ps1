@@ -1,77 +1,56 @@
 <#
-Tag & Release Script
-====================
+Tag & Release Script (Automatic Commit + Tag)
+============================================
 
-This script automates semantic versioning and release tagging for the
-LeetCodeUtils project. It generates a version tag (vX.Y.Z), pushes it to
-GitHub, and triggers the GitHub Actions pipeline that builds, tests,
-packs, and publishes the package to NuGet via Trusted Publishing.
+This script:
 
-USAGE:
-    ./tag-release.ps1 -Patch
-        Automatically bumps the patch version.
-        Example: v1.4.2 → v1.4.3
-
-    ./tag-release.ps1 -Version 1.5.0
-        Creates and pushes tag v1.5.0.
-
-BEHAVIOR:
-    • Ensures the script is run inside a Git repository.
-    • Ensures the working tree is clean (no uncommitted changes).
-    • Reads the latest Git tag (or defaults to 0.0.0).
-    • Computes the new version (auto or manual).
-    • Creates a Git tag in the format: vMAJOR.MINOR.PATCH
-    • Pushes the tag to origin.
-    • GitHub Actions detects the tag and:
-        - Builds the solution
-        - Runs all tests
-        - Packs the NuGet package
-        - Publishes to NuGet.org (Trusted Publishing)
-        - Creates a GitHub Release with the .nupkg attached
+• Auto-stages all changes
+• Auto-commits with a generated message (unless provided)
+• Determines the next version (patch bump or manual)
+• Creates the tag vX.Y.Z
+• Pushes commit + tag to origin
+• Triggers GitHub Actions Trusted Publishing
 
 NOTES:
-    • This script does NOT build or publish locally.
-    • All publishing happens inside GitHub Actions.
-    • Tags must follow the format: vX.Y.Z
+• Does NOT require a clean working tree
+• Does NOT modify source files
+• Versioning is tag-driven only
 #>
+
 param(
     [string]$Version = "",
-    [switch]$Patch
+    [switch]$Patch,
+    [string]$Message = ""
 )
 
 $ErrorActionPreference = "Stop"
 
-if (-not (& git rev-parse --is-inside-work-tree 2 -gt $null)) {
+# Ensure inside a Git repo
+if (-not (git rev-parse --is-inside-work-tree 2>$null)) {
     Write-Host "ERROR: Not inside a git repository."
     exit 1
 }
 
-# Ensure clean working tree
-$status = git status --porcelain
-if ($status) {
-    Write-Host "ERROR: Working tree is not clean. Commit or stash changes first."
-    exit 1
+# Auto-stage everything
+git add -A
+
+# Auto-generate commit message if none provided
+if (-not $Message) {
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $Message = "Release prep: auto-commit at $timestamp"
 }
+
+git commit -m "$Message"
 
 # Determine version
-if ($Version -eq "" -and -not $Patch) {
-    Write-Host "Usage: ./tag-release.ps1 -Version 1.2.3  OR  ./tag-release.ps1 -Patch"
-    exit 1
-}
-
 function Get-CurrentVersion {
     $tag = git describe --tags --abbrev=0 2>$null
-    if (-not $tag) {
-        return "0.0.0"
-    }
+    if (-not $tag) { return "0.0.0" }
     return $tag.TrimStart("v")
 }
 
 function New-PatchVersion([string]$v) {
     $parts = $v.Split(".")
-    if ($parts.Count -ne 3) {
-        throw "Invalid version format: $v"
-    }
     $major = [int]$parts[0]
     $minor = [int]$parts[1]
     $patch = [int]$parts[2] + 1
@@ -83,11 +62,18 @@ if ($Patch) {
     $Version = New-PatchVersion $current
 }
 
+if (-not $Version) {
+    Write-Host "ERROR: Must specify -Version or -Patch"
+    exit 1
+}
+
 $tagName = "v$Version"
 
 Write-Host "Creating tag: $tagName"
-
 git tag $tagName
+
+Write-Host "Pushing commit + tag"
+git push origin HEAD
 git push origin $tagName
 
-Write-Host "Tag $tagName pushed. GitHub Actions will build, test, pack, and publish."
+Write-Host "Tag $tagName pushed. GitHub Actions will publish via Trusted Publishing."

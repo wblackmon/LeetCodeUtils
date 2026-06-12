@@ -1,0 +1,53 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore LeetCodeUtils.sln
+
+      - name: Build
+        run: dotnet build LeetCodeUtils.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test LeetCodeUtils.sln -c Release --no-build
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Pack
+        run: dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj \
+          -c Release \
+          -p:PackageVersion=${{ env.VERSION }} \
+          -o ./artifacts
+
+      - name: Publish to NuGet.org (Trusted Publishing)
+        run: dotnet nuget push "./artifacts/*.nupkg" \
+          --source "https://api.nuget.org/v3/index.json" \
+          --skip-duplicate
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/*.nupkg
