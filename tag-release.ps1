@@ -24,7 +24,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Ensure inside a Git repo
-if (-not (git rev-parse --is-inside-work-tree 2>$null)) {
+$isRepo = & git rev-parse --is-inside-work-tree 2>$null
+if (-not $isRepo) {
     Write-Host "ERROR: Not inside a git repository."
     exit 1
 }
