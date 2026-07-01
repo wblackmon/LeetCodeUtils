@@ -166,11 +166,12 @@ Build and pack:
 dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj -c Release -o ./artifacts
 ```
 
-Publish (Trusted Publishing via GitHub Actions):
+Publish via GitHub Actions using a NuGet.org API key secret:
 
 ```bash
 dotnet nuget push ./artifacts/*.nupkg \
   --source https://api.nuget.org/v3/index.json \
+  --api-key "$NUGET_API_KEY" \
   --skip-duplicate
 ```
 

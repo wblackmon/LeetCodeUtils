@@ -4,8 +4,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>LeetCodeUtils</PackageId>
+    <Title>LeetCodeUtils</Title>
+    <Authors>Wayne Eliot Blackmon</Authors>
+    <Description>LeetCodeUtils is a lightweight .NET 8 library providing canonical data structures and helper utilities for solving algorithm problems. Includes ListNode and TreeNode with creation and printing methods, plus console demos and xUnit tests. Ideal for LeetCode practice and interview prep.</Description>
+    <PackageTags>leetcode;algorithms;datastructures;dotnet;utility</PackageTags>
+    <PackageProjectUrl>https://github.com/wblackmon/LeetCodeUtils</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wblackmon/LeetCodeUtils</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
