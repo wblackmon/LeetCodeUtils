@@ -16,7 +16,7 @@ jobs:
 
     env:
       VERSION: ""
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      NUGET_AUTH_TOKEN: ""
 
     steps:
       - name: Checkout
@@ -39,18 +39,20 @@ jobs:
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
-      - name: Validate NuGet API key
+      - name: Request NuGet OIDC Token
+        id: nuget_token
         run: |
-          if [ -z "${NUGET_API_KEY}" ]; then
-            echo "NUGET_API_KEY secret is required for publishing to NuGet.org." >&2
-            exit 1
-          fi
+          TOKEN=$(curl -s \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://nuget.org" \
+            | jq -r '.value')
+          echo "NUGET_AUTH_TOKEN=$TOKEN" >> $GITHUB_ENV
 
       - name: Pack
         run: dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj -c Release -p:PackageVersion=${{ env.VERSION }} -o ./artifacts
 
-      - name: Publish to NuGet.org
-        run: dotnet nuget push "./artifacts/*.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key "${NUGET_API_KEY}" --skip-duplicate
+      - name: Publish to NuGet.org (Trusted Publishing)
+        run: dotnet nuget push "./artifacts/*.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key "${{ env.NUGET_AUTH_TOKEN }}" --skip-duplicate
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
