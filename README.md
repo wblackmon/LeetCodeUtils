@@ -1,12 +1,24 @@
----
-
-## 📘 README.md
-
-```markdown
 # LeetCodeUtils
 
-LeetCodeUtils is a reusable **.NET 8 class library** that provides helper utilities for solving LeetCode problems.  
-It includes canonical data structures (`ListNode`, `TreeNode`) and utility methods (`ListNodeUtils`, `TreeNodeUtils`) for **creation, printing, and debugging** linked lists and binary trees.
+LeetCodeUtils is a lightweight **.NET 8** utility library providing canonical data structures and helper methods commonly used in LeetCode problems.  
+It includes:
+
+- **ListNode** (singly linked list)
+- **TreeNode** (binary tree)
+- **ListNodeUtils** (creation, conversion, printing)
+- **TreeNodeUtils** (creation, conversion, pretty‑printing)
+
+Designed for **interview prep**, **algorithm practice**, and **cleaner LeetCode solutions**.
+
+---
+
+## 📦 Install via NuGet
+
+```
+dotnet add package LeetCodeUtils
+```
+
+NuGet: https://www.nuget.org/packages/LeetCodeUtils
 
 ---
 
@@ -16,17 +28,17 @@ It includes canonical data structures (`ListNode`, `TreeNode`) and utility metho
 LeetCodeUtils.sln
 │
 ├── src/
-│   ├── LeetCodeUtils/           # Class Library (NuGet-ready)
+│   ├── LeetCodeUtils/              # Class Library (NuGet package)
 │   │   ├── ListNode.cs
 │   │   ├── TreeNode.cs
 │   │   ├── ListNodeUtils.cs
 │   │   └── TreeNodeUtils.cs
 │   │
-│   └── LeetCodeUtils.Console/   # Console demo project
+│   └── LeetCodeUtils.Console/      # Console demo
 │       └── Program.cs
 │
 └── tests/
-    └── LeetCodeUtils.Tests/     # xUnit test project
+    └── LeetCodeUtils.Tests/        # xUnit test suite
         ├── ListNodeUtilsTests.cs
         └── TreeNodeUtilsTests.cs
 ```
@@ -35,19 +47,19 @@ LeetCodeUtils.sln
 
 ## 🚀 Getting Started
 
-### 1. Clone & Build
+### Build the solution
 ```bash
-git clone https://github.com/wayneblackmon/LeetCodeUtils.git
+git clone https://github.com/wblackmon/LeetCodeUtils.git
 cd LeetCodeUtils
 dotnet build
 ```
 
-### 2. Run Console Demo
+### Run the console demo
 ```bash
 dotnet run --project src/LeetCodeUtils.Console
 ```
 
-### 3. Run Tests
+### Run tests
 ```bash
 dotnet test
 ```
@@ -56,40 +68,90 @@ dotnet test
 
 ## 🔗 Usage Examples
 
-### Linked List
+### Linked List Example
+
 ```csharp
 using LeetCodeUtils;
 
-var list = ListNodeUtils.Create(new int[] { 1, 2, 3, 4 });
-Console.WriteLine(list.Print()); 
+// Create a linked list from an array
+var head = ListNodeUtils.FromArray(new[] { 1, 2, 3, 4 });
+
+// Convert back to array
+int[] values = ListNodeUtils.ToArray(head);
+
+// Pretty-print the list
+Console.WriteLine(ListNodeUtils.ToString(head));
 // Output: 1 -> 2 -> 3 -> 4
 ```
 
-### Binary Tree
+### Binary Tree Example
+
 ```csharp
 using LeetCodeUtils;
 
-var tree = TreeNodeUtils.Create(new int[] { 1, 2, 3, 4, 5 });
-Console.WriteLine(tree.Print()); 
-// Output: [1, 2, 3, 4, 5]
+// Create a binary tree from level-order input
+var root = TreeNodeUtils.FromLevelOrder(new int?[] { 1, 2, 3, null, 5 });
+
+// Pretty-print the tree
+Console.WriteLine(TreeNodeUtils.ToPrettyString(root));
 ```
+
+---
+
+## 🧱 Included Data Structures
+
+### ListNode
+```csharp
+public class ListNode {
+    public int val;
+    public ListNode next;
+}
+```
+
+### TreeNode
+```csharp
+public class TreeNode {
+    public int val;
+    public TreeNode left;
+    public TreeNode right;
+}
+```
+
+---
+
+## 🔧 Utility Methods
+
+### ListNodeUtils
+- `FromArray(int[])`
+- `ToArray(ListNode)`
+- `ToString(ListNode)`
+- `Append(ListNode, int)`
+- `Reverse(ListNode)`
+
+### TreeNodeUtils
+- `FromLevelOrder(int?[])`
+- `ToLevelOrder(TreeNode)`
+- `ToPrettyString(TreeNode)`
+- `Height(TreeNode)`
+- `IsBalanced(TreeNode)`
 
 ---
 
 ## 🧪 Testing
 
-Unit tests are included in the `LeetCodeUtils.Tests` project using **xUnit**:
+Example xUnit test:
 
 ```csharp
 [Fact]
-public void Print_ShouldReturnCorrectString()
+public void ToString_ShouldReturnCorrectFormat()
 {
-    var head = ListNodeUtils.Create(new int[] { 1, 2, 3 });
-    Assert.Equal("1 -> 2 -> 3", head.Print());
+    var head = ListNodeUtils.FromArray(new[] { 1, 2, 3 });
+    Assert.Equal("1 -> 2 -> 3", ListNodeUtils.ToString(head));
 }
 ```
 
 Run tests:
+
 ```bash
 dotnet test
 ```
@@ -98,57 +160,31 @@ dotnet test
 
 ## 📦 NuGet Packaging
 
-To build and pack the library:
+Build and pack:
 
 ```bash
 dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj -c Release -o ./artifacts
 ```
 
-To publish to NuGet.org:
+Publish (Trusted Publishing via GitHub Actions):
+
 ```bash
-dotnet nuget push ./artifacts/LeetCodeUtils.*.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/*.nupkg \
+  --source https://api.nuget.org/v3/index.json \
+  --skip-duplicate
 ```
 
 ---
 
 ## 🏗️ Roadmap
 
-- [ ] Add **PrettyPrint** ASCII renderer for binary trees  
-- [ ] Add **random generators** for linked lists and trees  
-- [ ] Add **conversion utilities** (array ↔ list/tree)  
-- [ ] Expand test coverage  
+- PrettyPrint ASCII renderer for binary trees  
+- Random linked list & tree generators  
+- Additional conversion helpers  
+- Expanded test coverage  
 
 ---
-
-## 🚀 Automated Releases & Versioning
-
-LeetCodeUtils uses a fully automated release pipeline powered by:
-
-- **Semantic version tags** (`v1.2.3`)
-- **GitHub Actions CI/CD**
-- **NuGet Trusted Publishing** (no API keys required)
-- **A local versioning script** (`tag-release.ps1`)
-
-Publishing a new version requires **one command**.
-
----
-
-## 🔢 Versioning & Tagging
-
-Use the `tag-release.ps1` script to create and push version tags.
-
-### Automatic Patch Bump
-```powershell
-./tag-release.ps1 -Patch
-
 
 ## 📜 License
 
 MIT License © Wayne Eliot Blackmon
-```
-
----
-
-⚡ This is now a **single, self‑contained README file** you can drop into the root of your repo. It covers **solution structure, usage, tests, NuGet packaging, and roadmap** all in one place.  
-
-👉 Do you want me to also add **badges** (build status, NuGet version, test coverage) so your README looks polished when hosted on GitHub?

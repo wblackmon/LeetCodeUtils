@@ -24,16 +24,17 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Ensure inside a Git repo
-if (-not (& git rev-parse --is-inside-work-tree 2 -gt $null)) {
+$insideRepo = git rev-parse --is-inside-work-tree 2>$null
+if (-not $insideRepo) {
     Write-Host "ERROR: Not inside a git repository."
     exit 1
 }
 
 Write-Host "=== Building ==="
-dotnet build LeetCodeUtils.sln -c Release
+dotnet build LeetCodeUtils.sln -c Release --no-restore
 
 Write-Host "=== Testing ==="
-dotnet test LeetCodeUtils.sln -c Release
+dotnet test LeetCodeUtils.sln -c Release --no-build
 
 # Stage all changes (even if working tree was dirty)
 git add -A
