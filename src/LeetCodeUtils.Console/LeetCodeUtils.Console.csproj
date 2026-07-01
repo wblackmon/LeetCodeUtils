@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LeetCodeUtils\LeetCodeUtils.csproj" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -9,6 +10,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
 </Project>
