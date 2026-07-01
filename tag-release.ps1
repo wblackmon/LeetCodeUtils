@@ -24,14 +24,13 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Ensure inside a Git repo
-$isRepo = & git rev-parse --is-inside-work-tree 2>$null
-if (-not $isRepo) {
+if (-not (git rev-parse --is-inside-work-tree 2>&1 | Out-Null)) {
     Write-Host "ERROR: Not inside a git repository."
     exit 1
 }
 
 # Always fetch tags so version detection is correct
-git fetch --tags --force
+git fetch --tags
 
 # Auto-stage everything
 git add -A
@@ -51,21 +50,9 @@ try {
 
 # Version helpers
 function Get-CurrentVersion {
-    $tags = git tag --list | Where-Object { $_ -match '^v?\d+\.\d+\.\d+$' }
-    if (-not $tags) { return "0.0.0" }
-
-    $latestTag = $tags |
-        ForEach-Object {
-            [pscustomobject]@{
-                Raw = $_
-                Version = $_.TrimStart('v')
-                Parts = [int[]]($_.TrimStart('v').Split('.'))
-            }
-        } |
-        Sort-Object -Property @{ Expression = { $_.Parts[0] } }, @{ Expression = { $_.Parts[1] } }, @{ Expression = { $_.Parts[2] } } |
-        Select-Object -Last 1
-
-    return $latestTag.Version
+    $tag = git describe --tags --abbrev=0 2>$null
+    if (-not $tag) { return "0.0.0" }
+    return $tag.TrimStart("v")
 }
 
 function New-PatchVersion([string]$v) {
