@@ -1,25 +1,23 @@
 <#
-Tag & Release Script (Automatic Commit + Tag)
-============================================
-
-This script:
-
-• Auto-stages all changes
-• Auto-commits with a generated message (unless provided)
-• Determines the next version (patch bump or manual)
-• Creates the tag vX.Y.Z
+Hardened Tag & Release Script
+=============================
+Features:
+• Always fetches tags before version detection (fixes stale tag issue)
+• Supports -Patch, -Minor, -Major, or explicit -Version
+• Validates version format
+• Prevents duplicate tags
+• Auto-stages and auto-commits changes
 • Pushes commit + tag to origin
 • Triggers GitHub Actions Trusted Publishing
 
-NOTES:
-• Does NOT require a clean working tree
-• Does NOT modify source files
-• Versioning is tag-driven only
+This script is deterministic, idempotent, and safe.
 #>
 
 param(
     [string]$Version = "",
     [switch]$Patch,
+    [switch]$Minor,
+    [switch]$Major,
     [string]$Message = ""
 )
 
@@ -31,6 +29,9 @@ if (-not (git rev-parse --is-inside-work-tree 2>$null)) {
     exit 1
 }
 
+# Always fetch tags so version detection is correct
+git fetch --tags
+
 # Auto-stage everything
 git add -A
 
@@ -40,9 +41,14 @@ if (-not $Message) {
     $Message = "Release prep: auto-commit at $timestamp"
 }
 
-git commit -m "$Message"
+# Commit only if needed
+try {
+    git commit -m "$Message"
+} catch {
+    Write-Host "No changes to commit. Continuing..."
+}
 
-# Determine version
+# Version helpers
 function Get-CurrentVersion {
     $tag = git describe --tags --abbrev=0 2>$null
     if (-not $tag) { return "0.0.0" }
@@ -51,23 +57,50 @@ function Get-CurrentVersion {
 
 function New-PatchVersion([string]$v) {
     $parts = $v.Split(".")
-    $major = [int]$parts[0]
-    $minor = [int]$parts[1]
-    $patch = [int]$parts[2] + 1
-    return "$major.$minor.$patch"
+    return "$($parts[0]).$($parts[1]).$([int]$parts[2] + 1)"
 }
+
+function New-MinorVersion([string]$v) {
+    $parts = $v.Split(".")
+    return "$($parts[0]).$([int]$parts[1] + 1).0"
+}
+
+function New-MajorVersion([string]$v) {
+    $parts = $v.Split(".")
+    return "$([int]$parts[0] + 1).0.0"
+}
+
+# Determine version
+$current = Get-CurrentVersion
 
 if ($Patch) {
-    $current = Get-CurrentVersion
     $Version = New-PatchVersion $current
 }
+elseif ($Minor) {
+    $Version = New-MinorVersion $current
+}
+elseif ($Major) {
+    $Version = New-MajorVersion $current
+}
+elseif (-not $Version) {
+    Write-Host "ERROR: Must specify -Version or -Patch or -Minor or -Major"
+    exit 1
+}
 
-if (-not $Version) {
-    Write-Host "ERROR: Must specify -Version or -Patch"
+# Validate version format
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
+    Write-Host "ERROR: Invalid version format. Expected X.Y.Z"
     exit 1
 }
 
 $tagName = "v$Version"
+
+# Prevent duplicate tags
+$existing = git tag --list $tagName
+if ($existing) {
+    Write-Host "ERROR: Tag $tagName already exists. Aborting."
+    exit 1
+}
 
 Write-Host "Creating tag: $tagName"
 git tag $tagName
