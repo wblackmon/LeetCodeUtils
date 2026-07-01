@@ -17,7 +17,7 @@ jobs:
     env:
       VERSION: ""
       NUGET_AUTH_TOKEN: ""
-      
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,17 +40,27 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
+      # Request OIDC token for NuGet.org (REQUIRED)
+      - name: Request NuGet OIDC Token
+        id: nuget_token
+        uses: actions/oidc-token@v1
+        with:
+          audience: "api://nuget.org"
+
+      # Store OIDC token in environment
       - name: Configure OIDC for NuGet.org
         run: |
-          echo "NUGET_AUTH_TOKEN=${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" >> $GITHUB_ENV
-          echo "NUGET_AUTH_TOKEN_REQUEST_URL=${ACTIONS_ID_TOKEN_REQUEST_URL}" >> $GITHUB_ENV
+          echo "NUGET_AUTH_TOKEN=${{ steps.nuget_token.outputs.token }}" >> $GITHUB_ENV
 
+      # Pack using the version extracted from the tag
       - name: Pack
         run: dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj -c Release -p:PackageVersion=${{ env.VERSION }} -o ./artifacts
 
+      # Publish using Trusted Publishing (OIDC token)
       - name: Publish to NuGet.org (Trusted Publishing)
         run: dotnet nuget push "./artifacts/*.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key "${{ env.NUGET_AUTH_TOKEN }}" --skip-duplicate
 
+      # Create GitHub Release with the .nupkg attached
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
