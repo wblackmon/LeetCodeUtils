@@ -46,16 +46,10 @@ jobs:
           echo "NUGET_AUTH_TOKEN_REQUEST_URL=${ACTIONS_ID_TOKEN_REQUEST_URL}" >> $GITHUB_ENV
 
       - name: Pack
-        run: dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj \
-          -c Release \
-          -p:PackageVersion=${{ env.VERSION }} \
-          -o ./artifacts
+        run: dotnet pack src/LeetCodeUtils/LeetCodeUtils.csproj -c Release -p:PackageVersion=${{ env.VERSION }} -o ./artifacts
 
       - name: Publish to NuGet.org (Trusted Publishing)
-        run: dotnet nuget push "./artifacts/*.nupkg" \
-          --source "https://api.nuget.org/v3/index.json" \
-          --api-key "${{ env.NUGET_AUTH_TOKEN }}" \
-          --skip-duplicate
+        run: dotnet nuget push "./artifacts/*.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key "${{ env.NUGET_AUTH_TOKEN }}" --skip-duplicate
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
