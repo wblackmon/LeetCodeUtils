@@ -30,7 +30,7 @@ if (-not (git rev-parse --is-inside-work-tree 2>$null)) {
 }
 
 # Always fetch tags so version detection is correct
-git fetch --tags
+git fetch --tags --force
 
 # Auto-stage everything
 git add -A
@@ -50,9 +50,21 @@ try {
 
 # Version helpers
 function Get-CurrentVersion {
-    $tag = git describe --tags --abbrev=0 2>$null
-    if (-not $tag) { return "0.0.0" }
-    return $tag.TrimStart("v")
+    $tags = git tag --list | Where-Object { $_ -match '^v?\d+\.\d+\.\d+$' }
+    if (-not $tags) { return "0.0.0" }
+
+    $latestTag = $tags |
+        ForEach-Object {
+            [pscustomobject]@{
+                Raw = $_
+                Version = $_.TrimStart('v')
+                Parts = [int[]]($_.TrimStart('v').Split('.'))
+            }
+        } |
+        Sort-Object -Property @{ Expression = { $_.Parts[0] } }, @{ Expression = { $_.Parts[1] } }, @{ Expression = { $_.Parts[2] } } |
+        Select-Object -Last 1
+
+    return $latestTag.Version
 }
 
 function New-PatchVersion([string]$v) {
